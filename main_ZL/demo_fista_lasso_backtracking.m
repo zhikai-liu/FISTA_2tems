@@ -14,13 +14,14 @@ Xinit=[];
 l=6e4:12e4;
 %[~,Xinit]=signal_deconv(Y(1:length(Y)/100,1), template,5e4,50,2000);
 %X = fista_lasso_backtracking_template(Y(l,1), template, Xinit, opts);
+% [X1,X2,cost_matrix] = fista_lasso_backtracking_2tems(Y(l,1), template1,template2, Xinit,Xinit, opts);
 %% The lasso problem is: argmin( 1/2(Y-A*x1-B*x2)^2+lambda1*|x1|+lambda2*|x2|)
 
 cost_matrix=zeros(10,10);
 for i=1:10
     for j=1:10
-        opts.lambda1=i*1000;
-        opts.lambda2=j*1000;
+        opts.lambda1=i*2000;
+        opts.lambda2=j*2000;
         [X1,X2,cost_matrix(i,j)] = fista_lasso_backtracking_2tems(Y(l,1), template1,template2, Xinit,Xinit, opts);
     end
 end
@@ -40,3 +41,4 @@ end
 % plot(conv(X2,template2),'c')
 % hold off;
 % samexaxis('abc','xmt','on','ytac','join','yld',1);
+heatmap(cost_matrix)
