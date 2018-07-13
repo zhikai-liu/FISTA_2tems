@@ -12,7 +12,7 @@ figure;
 subplot(3,1,1)
 hold on;
 for i=1:length(X1_max)
-    if X1_max(i)+5<length(X1)
+    if X1_max(i)+5<length(X1)&&X1_max(i)-5>0
         plot(X1(X1_max(i)-5:X1_max(i)+5),'k')
         X1_X2_ratio(i,1)=sum(X1_recon(X1_max(i):X1_max(i)+50))-51*max(X1_recon(X1_max(i):X1_max(i)+50));
     end
@@ -21,7 +21,7 @@ hold off;
 subplot(3,1,2)
 hold on;
 for i=1:length(X1_max)
-    if X1_max(i)+5<length(X2)
+    if X1_max(i)+5<length(X2)&&X1_max(i)-5>0
         plot(X2(X1_max(i)-5:X1_max(i)+5),'k')
          X1_X2_ratio(i,2)=sum(X2_recon(X1_max(i):X1_max(i)+50))-51*max(X2_recon(X1_max(i):X1_max(i)+50));
     end
