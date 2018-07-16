@@ -1,42 +1,37 @@
+function [X1_max,recon_integral,chemical]=fista_local_maxima(signal,X1,X2,template1,template2)
 X1_recon=conv(X1,template1);
 X2_recon=conv(X2,template2);
+peak_width=5;
+int_width=50;
 
-
-X1_max=get_local_maxima_above_threshold(X1,0.005,1);
-X1_X2_ratio=zeros(length(X1_max),2);
+X1_max=get_local_maxima_above_threshold(X1,3.5*std(X1),1);
+recon_integral=zeros(length(X1_max),2);
 figure;
 plot(signal);
 hold on;
 scatter(X1_max,signal(X1_max),'r*')
 figure;
-subplot(3,1,1)
+subplot(2,1,1)
 hold on;
 for i=1:length(X1_max)
-    if X1_max(i)+5<length(X1)&&X1_max(i)-5>0
-        plot(X1(X1_max(i)-5:X1_max(i)+5),'k')
-        X1_X2_ratio(i,1)=sum(X1_recon(X1_max(i):X1_max(i)+50))-51*max(X1_recon(X1_max(i):X1_max(i)+50));
+    if X1_max(i)+peak_width<length(X1)&&X1_max(i)-peak_width>0
+        plot(X1(X1_max(i)-peak_width:X1_max(i)+peak_width),'k')
+        recon_integral(i,1)=sum(X1_recon(X1_max(i)+1:X1_max(i)+int_width))-int_width*max(X1_recon(X1_max(i)+1:X1_max(i)+int_width));
     end
 end
 hold off;
-subplot(3,1,2)
+subplot(2,1,2)
 hold on;
 for i=1:length(X1_max)
-    if X1_max(i)+5<length(X2)&&X1_max(i)-5>0
-        plot(X2(X1_max(i)-5:X1_max(i)+5),'k')
-         X1_X2_ratio(i,2)=sum(X2_recon(X1_max(i):X1_max(i)+50))-51*max(X2_recon(X1_max(i):X1_max(i)+50));
+    if X1_max(i)+peak_width<length(X2)&&X1_max(i)-peak_width>0
+        plot(X2(X1_max(i)-peak_width:X1_max(i)+peak_width),'k')
+        recon_integral(i,2)=sum(X2_recon(X1_max(i)+1:X1_max(i)+int_width))-int_width*max(X2_recon(X1_max(i)+1:X1_max(i)+int_width));
     end
 end
 hold off;
-subplot(3,1,3)
-hold on;
-for i=1:length(X1_max)
-    if X1_max(i)+5<length(X2)&&X2(X1_max(i))<-0.005
-        plot(X1(X1_max(i)-5:X1_max(i)+5)+X2(X1_max(i)-5:X1_max(i)+5),'k')
-    end
-end
 figure;
-scatter(-X1_X2_ratio(:,1),-X1_X2_ratio(:,2),'k');
-chemical=-X1_X2_ratio(:,2)>-X1_X2_ratio(:,1);
+scatter(-recon_integral(:,1),-recon_integral(:,2),'k');
+chemical=-recon_integral(:,2)>-recon_integral(:,1);
 
 
 figure;
@@ -65,3 +60,4 @@ hold on;
 plot(X2_recon,'c')
 hold off;
 samexaxis('abc','xmt','on','ytac','join','yld',1);
+end
