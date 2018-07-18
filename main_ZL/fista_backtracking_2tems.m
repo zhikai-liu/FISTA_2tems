@@ -102,7 +102,9 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
     L = opts.L0;
     opts0 = opts;
     while  iter < opts.max_iter
-        tic
+        if opts.verbose
+            tic
+        end
         iter = iter + 1;
         % find i_k 
         Lbar = L; 
