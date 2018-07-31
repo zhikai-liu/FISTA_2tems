@@ -40,11 +40,8 @@ function [X1,X2,cost_total] = fista_lasso_backtracking_2tems(Y, template1,templa
 
     opts.max_iter = 500;
     % for backtracking, we need to optimize one by one 
-    X1 = zeros(size(Xinit1));
-    X2 = zeros(size(Xinit2));
-    for i = 1:size(X1, 2) 
-       [X1(:, i),X2(:, i)] = fista_backtracking_2tems(@calc_f, @grad, Xinit1,Xinit2, opts, ...
+ 
+    [X1,X2] = fista_backtracking_2tems(@calc_f, @grad, Xinit1,Xinit2, opts, ...
                                         @calc_F);
-    end
     cost_total=calc_F(X1,X2);
 end 
