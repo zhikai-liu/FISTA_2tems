@@ -1,4 +1,4 @@
-function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, calc_F)   
+function X = fista_backtracking_template(calc_f, grad, Xinit, opts, calc_F)   
 % function [X, iter, min_cost] = fista_backtracking(calc_f, grad, Xinit, opts, calc_F)   
 % * A Fast Iterative Shrinkage-Thresholding Algorithm for 
 % Linear Inverse Problems: FISTA (backtracking version)
@@ -58,9 +58,6 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
     if ~isfield(opts, 'eta')
         opts.eta = 2;
     end 
-%     if ~isfield(opts, 'lambda2_scaler')
-%         opts.lambda2_scaler = 4;
-%     end 
 
     %% projection 
     function res = projection(U, opts) 
@@ -74,29 +71,26 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
         end
     end 
     %% computer g 
-    function res = g(x1,x2) 
+    function res = g(x) 
         switch opts.regul
             case 'l1'
-                res = sum(sum(abs(opts.lambda1.*x1)))+sum(sum(abs(opts.lambda2.*x2)));
-                %res = opts.lambda1.*norm1(x1)+opts.lambda2.*opts.lambda2_scaler.*norm1(x2)-opts.lambda2.*(opts.lambda2_scaler-1).*norm1(x2.*(x1~=0));
-%             case 'l2' 
-%                 res = opts.lambda*norm2_cols(x);
-%             case 'l12'
-%                 res = opts.lambda*norm12(x);
+                res = sum(sum(abs(opts.lambda.*x)));
+            case 'l2' 
+                res = opts.lambda*norm2_cols(x);
+            case 'l12'
+                res = opts.lambda*norm12(x);
         end
     end 
 
     %% computer Q 
-    function res = calc_Q(x1, x2, y1, y2, L,g1,g2) 
+    function res = calc_Q(x, y, L,grdt) 
         % based on equation 2.5, page 189
-        res = feval(calc_f, y1, y2) + (x1 - y1)'*g1 +(x2 - y2)'*g2 ...
-                    + L/2*normF2(x1 - y1) + L/2*normF2(x2 - y2) + g(x1,x2);
+        res = feval(calc_f, y) + (x - y)'*grdt ...
+                    + L/2*normF2(x - y) + g(x);
     end 
 
-    x1_old = Xinit1;
-    x2_old = Xinit2;
-    y1_old = Xinit1;
-    y2_old = Xinit2;
+    x_old = Xinit;
+    y_old = Xinit;
     t_old = 1;
     iter = 0;
     cost_old = 1e10;
@@ -106,20 +100,17 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
     L = opts.L0;
     opts0 = opts;
     while  iter < opts.max_iter
-        if opts.verbose
-            tic
-        end
+        tic
         iter = iter + 1;
         % find i_k 
         Lbar = L; 
-        [g1,g2]=feval(grad, y1_old, y2_old);
+        grdt=feval(grad, y_old);
         while true 
-            opts0.lambda = opts.lambda1/Lbar; 
-            zk1 = projection(y1_old - 1/Lbar*g1, opts0);
-            opts0.lambda = opts.lambda2/Lbar;
-            zk2 = projection(y2_old - 1/Lbar*g2, opts0);
-            F = feval(calc_F, zk1, zk2);
-            Q = calc_Q(zk1, zk2, y1_old, y2_old, Lbar,g1,g2);
+            opts0.lambda = opts.lambda/Lbar; 
+            zk = projection(y_old - 1/Lbar*grdt, opts0);
+            F = feval(calc_F, zk);
+            Q = calc_Q(zk, y_old, Lbar, grdt);
+            
             if F <= Q 
                 break;
             end
@@ -127,29 +118,23 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
             L = Lbar; 
         end 
 %         L = L/opts.eta;
-        opts_proj.lambda = opts.lambda1/L;
-        x1_new = projection(y1_old - 1/L*g1, opts_proj);
+        opts_proj.lambda = opts.lambda/L;
+        x_new = projection(y_old - 1/L*grdt, opts_proj);
         t_new = 0.5*(1 + sqrt(1 + 4*t_old^2));
-        y1_new = x1_new + (t_old - 1)/t_new * (x1_new - x1_old);
-    
-        opts_proj.lambda = opts.lambda2/L;
-        x2_new = projection(y2_old - 1/L*g2, opts_proj);
-        y2_new = x2_new + (t_old - 1)/t_new * (x2_new - x2_old);
+        y_new = x_new + (t_old - 1)/t_new * (x_new - x_old);
         %% check stop criteria
-        e = (norm1(x1_new - x1_old)+norm1(x2_new - x2_old))/(numel(x1_new)+numel(x2_new));
+        e = norm1(x_new - x_old)/numel(x_new);
         if e < opts.tol
             break;
         end
         %% update
+        x_old = x_new;
         t_old = t_new;
-        x1_old = x1_new;
-        y1_old = y1_new;
-        x2_old = x2_new;
-        y2_old = y2_new;
+        y_old = y_new;
         %% show progress
         if opts.verbose
             if nargin ~= 0
-                cost_new = feval(calc_F, x1_new, x2_new);
+                cost_new = feval(calc_F, x_new);
                 if cost_new <= cost_old 
                     stt = 'YES.';
                 else 
@@ -169,6 +154,6 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
             end        
         end 
     end
-    X1 = x1_new;
-    X2 = x2_new;
+    X = x_new;
+
 end 

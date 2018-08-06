@@ -8,7 +8,7 @@ function [X1,X2,cost_total] = fista_lasso_backtracking_2tems(Y, template1,templa
     opts = initOpts(opts);
     lambda1 = opts.lambda1;
     lambda2 = opts.lambda2;
-   
+    %lambda2_scaler=opts.lambda2_scaler;
     if numel(Xinit1) == 0
         Xinit1 = zeros(size(Y,1)-size(template1,1)+1, size(Y,2));
     end
@@ -21,7 +21,8 @@ function [X1,X2,cost_total] = fista_lasso_backtracking_2tems(Y, template1,templa
     end 
     %% cost function 
     function cost = calc_F(X1,X2)
-            cost = calc_f(X1,X2) + lambda1*norm1(X1) + lambda2*norm1(X2);  
+            cost = calc_f(X1,X2) + lambda1*norm1(X1) + lambda2*norm1(X2);
+            %cost = calc_f(X1,X2) + lambda1*norm1(X1) + lambda2*lambda2_scaler*norm1(X2) - lambda2.*(lambda2_scaler-1).*norm1(X2.*(X1~=0));
     end 
     %% gradient
     %sigma_f(X1)=At(A*X1+B*X2-Y)

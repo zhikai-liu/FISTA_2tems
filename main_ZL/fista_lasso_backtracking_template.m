@@ -53,7 +53,7 @@ function X = fista_lasso_backtracking_template(Y, template, Xinit, opts)
     % for backtracking, we need to optimize one by one 
     X = zeros(size(Xinit));
     for i = 1:size(X, 2) 
-       X(:, i) = fista_backtracking(@calc_f, @grad, Xinit(:, i), opts, ...
+       X(:, i) = fista_backtracking_template(@calc_f, @grad, Xinit(:, i), opts, ...
                                         @calc_F);
     end 
 end 
