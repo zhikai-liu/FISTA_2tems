@@ -1,4 +1,4 @@
-function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, calc_F)   
+function [X1,X2,cost_iter] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, calc_F)   
 % function [X, iter, min_cost] = fista_backtracking(calc_f, grad, Xinit, opts, calc_F)   
 % * A Fast Iterative Shrinkage-Thresholding Algorithm for 
 % Linear Inverse Problems: FISTA (backtracking version)
@@ -105,6 +105,7 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
 %     opts_proj.lambda = lambdaLiv;
     L = opts.L0;
     opts0 = opts;
+    cost_iter=zeros(opts.max_iter,1);
     while  iter < opts.max_iter
         if opts.verbose
             tic
@@ -146,10 +147,11 @@ function [X1,X2] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit2, opts, c
         y1_old = y1_new;
         x2_old = x2_new;
         y2_old = y2_new;
+        cost_new = feval(calc_F, x1_new, x2_new);
+        cost_iter(iter)=cost_new;
         %% show progress
         if opts.verbose
             if nargin ~= 0
-                cost_new = feval(calc_F, x1_new, x2_new);
                 if cost_new <= cost_old 
                     stt = 'YES.';
                 else 

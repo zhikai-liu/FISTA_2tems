@@ -1,4 +1,4 @@
-function [X1,X2,cost_total] = fista_lasso_backtracking_2tems(Y, template1,template2, Xinit1,Xinit2, opts)
+function [X1,X2,cost_iter] = fista_lasso_backtracking_2tems(Y, template1,template2, Xinit1,Xinit2, opts)
 %% Modified from the orignal FISTA code, which uses only one template.
 %% Y is n*1 matrix,template is m*1 matrix, therefore X is (n-m+1)*1
     if ~isfield(opts, 'backtracking')
@@ -42,7 +42,6 @@ function [X1,X2,cost_total] = fista_lasso_backtracking_2tems(Y, template1,templa
     opts.max_iter = 500;
     % for backtracking, we need to optimize one by one 
  
-    [X1,X2] = fista_backtracking_2tems(@calc_f, @grad, Xinit1,Xinit2, opts, ...
+    [X1,X2,cost_iter] = fista_backtracking_2tems(@calc_f, @grad, Xinit1,Xinit2, opts, ...
                                         @calc_F);
-    cost_total=calc_F(X1,X2);
 end 
