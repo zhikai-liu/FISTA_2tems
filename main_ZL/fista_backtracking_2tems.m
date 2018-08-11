@@ -106,6 +106,9 @@ function [X1,X2,cost_iter] = fista_backtracking_2tems(calc_f, grad, Xinit1,Xinit
     L = opts.L0;
     opts0 = opts;
     cost_iter=zeros(opts.max_iter,1);
+    if parallel.gpu.GPUDevice.isAvailable
+        cost_iter=gpuArray(cost_iter);
+    end
     while  iter < opts.max_iter
         if opts.verbose
             tic
