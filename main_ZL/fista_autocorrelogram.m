@@ -12,7 +12,7 @@ for i=1:clust_num
     clust(i).LM=X1_max(clust_index==i);
 end
 %% Correlogram
-% The idea to auto-correlate or cross-correlate is to look at a single event, and count the events from
+% The idea to auto-correlate or cross-correlate is to look at a single event, and count probability distribution of events nearby from
 % either within the cluster or other clusters
 figure;
 subplot_num=1;
@@ -24,9 +24,15 @@ for j=1:clust_num
         spikes_i(clust(i).LM+pad)=1;
         dist_prox_index=[];
         for k=1:length(spikes_j)
+            %% Look at every spike first
             if spikes_j(k)==1
+                % For each spike, use it as a reference, and examine a small spike train within (pad)
+                % ms for that spike
                 bin_train=spikes_i(k-pad:k+pad);
+                % Make the reference spike to 0 so it will not be counted
                 bin_train(pad+1)=0;
+                % Calculate the distance of other spikes to the reference
+                % spike
                 dist_prox_index=[dist_prox_index,find(bin_train==1)-pad-1];
             end
         end
