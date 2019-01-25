@@ -1,4 +1,4 @@
-function fista_autocorrelogram(X1_max,clust_index)
+function correlation_sum=fista_autocorrelogram(X1_max,clust_index)
 si=20;%this is the time per data point
 show_ms=100;%prox time window for x axis, 100ms if 100
 pad=show_ms*1e3/si;%pad length is data point length
@@ -11,10 +11,14 @@ clust=struct();
 for i=1:clust_num
     clust(i).LM=X1_max(clust_index==i);
 end
+p2=zeros(clust_num,clust_num);
+p5=zeros(clust_num,clust_num);
+p10=zeros(clust_num,clust_num);
+correlation_gap=zeros(clust_num,clust_num);
 %% Correlogram
 % The idea to auto-correlate or cross-correlate is to look at a single event, and count probability distribution of events nearby from
 % either within the cluster or other clusters
-figure;
+figure('Unit','Normal','position',[0 0.1 0.6 0.9]);
 subplot_num=1;
 for j=1:clust_num
     spikes_j=zeros(1,max(X1_max)+2*pad);
@@ -44,12 +48,23 @@ for j=1:clust_num
             map_color=[0.3 0.3 0.3];% if cross-correlogram, colored by gray
         end
         histogram(dist_prox_index,bin,'Normalization','pdf','FaceColor',map_color,'EdgeColor','none')
+        histc=histcounts(dist_prox_index,bin,'Normalization','pdf');
+        p2(i,j)=round(sum(histc(98:102))./1*show_ms/2,2);
+        p5(i,j)=round(sum(histc(95:105))./1*show_ms/5,2);
+        p10(i,j)=round(sum(histc(90:110))./1*show_ms/10,2);
+        if p2(i,j)<0.35||(sum([p2(i,j),p5(i,j),p10(i,j)]<0.5)>1)
+            p_color='r';
+            correlation_gap(i,j)=1;
+        else
+            p_color='k';
+            correlation_gap(i,j)=0;
+        end
+        title([num2str(p2(i,j)) '/' num2str(p5(i,j)) '/' num2str(p10(i,j))],'Color',p_color)
         xlim([bin(1),bin(end)])
         subplot_num=subplot_num+1;
     end
 end
-% samexaxis('ytac','box','off');
 xlabel('ms')
 ylabel('Probability')
-
+correlation_sum=struct('p2',p2,'p5',p5,'p10',p10,'correlation_gap',correlation_gap);
 end 
