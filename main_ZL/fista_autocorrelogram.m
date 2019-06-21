@@ -11,7 +11,7 @@ clust=struct();
 for i=1:clust_num
     clust(i).LM=X1_max(clust_index==i);
 end
-p2=zeros(clust_num,clust_num);
+p1=zeros(clust_num,clust_num);
 p5=zeros(clust_num,clust_num);
 p10=zeros(clust_num,clust_num);
 correlation_gap=zeros(clust_num,clust_num);
@@ -49,22 +49,22 @@ for j=1:clust_num
         end
         histogram(dist_prox_index,bin,'Normalization','pdf','FaceColor',map_color,'EdgeColor','none')
         histc=histcounts(dist_prox_index,bin,'Normalization','pdf');
-        p2(i,j)=round(sum(histc(98:102))./1*show_ms/2,2);
-        p5(i,j)=round(sum(histc(95:105))./1*show_ms/5,2);
-        p10(i,j)=round(sum(histc(90:110))./1*show_ms/10,2);
-        if p2(i,j)<0.35||(sum([p2(i,j),p5(i,j),p10(i,j)]<0.5)>1)
+        p1(i,j)=round(sum(histc(100:101))./1*show_ms/1,2);
+        p5(i,j)=round(sum(histc(96:105))./1*show_ms/5,2);
+        p10(i,j)=round(sum(histc(91:110))./1*show_ms/10,2);
+        if p1(i,j)<0.3||(sum([p1(i,j),p5(i,j),p10(i,j)]<0.5)>1)
             p_color='r';
             correlation_gap(i,j)=1;
         else
             p_color='k';
             correlation_gap(i,j)=0;
         end
-        title([num2str(p2(i,j)) '/' num2str(p5(i,j)) '/' num2str(p10(i,j))],'Color',p_color)
+        title([num2str(p1(i,j)) '/' num2str(p5(i,j)) '/' num2str(p10(i,j))],'Color',p_color)
         xlim([bin(1),bin(end)])
         subplot_num=subplot_num+1;
     end
 end
 xlabel('ms')
 ylabel('Probability')
-correlation_sum=struct('p2',p2,'p5',p5,'p10',p10,'correlation_gap',correlation_gap);
+correlation_sum=struct('p1',p1,'p5',p5,'p10',p10,'correlation_gap',correlation_gap);
 end 
